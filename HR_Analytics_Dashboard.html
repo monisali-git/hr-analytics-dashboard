@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(255,255,255,0.07);
+    --gold: #f5c842;
+    --gold2: #e8a020;
+    --teal: #00d4c8;
+    --rose: #ff6b6b;
+    --blue: #4f8ef7;
+    --purple: #a855f7;
+    --text: #e8eaf0;
+    --muted: #6b7a99;
+    --green: #22c55e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  /* LOADER */
+  #loader { position:fixed; inset:0; background:var(--bg); z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; transition:opacity .5s; }
+  .loader-bar { width:200px; height:3px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; }
+  .loader-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--teal)); border-radius:99px; transition:width .4s ease; }
+  #loader p { color:var(--muted); font-size:13px; letter-spacing:1px; }
+
+  /* LAYOUT */
+  .wrapper { max-width:1400px; margin:0 auto; padding:24px; }
+
+  /* HEADER */
+  header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; padding:20px 28px; background:var(--surface); border-radius:16px; border:1px solid var(--border); }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon { width:42px; height:42px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:10px; display:grid; place-items:center; font-size:18px; }
+  .logo h1 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; background:linear-gradient(90deg,var(--gold),var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .logo p { font-size:12px; color:var(--muted); margin-top:2px; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; }
+  .filter-btn { padding:8px 16px; border-radius:99px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); font-size:12px; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; }
+  .filter-btn:hover, .filter-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(245,200,66,0.1); }
+
+  /* KPI GRID */
+  .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:24px; }
+  .kpi-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 16px; position:relative; overflow:hidden; cursor:default; transition:transform .2s, box-shadow .2s; }
+  .kpi-card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,0,0,0.4); }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .kpi-card:nth-child(1)::before { background:linear-gradient(90deg,var(--blue),var(--purple)); }
+  .kpi-card:nth-child(2)::before { background:linear-gradient(90deg,var(--rose),#ff9a56); }
+  .kpi-card:nth-child(3)::before { background:linear-gradient(90deg,var(--rose),var(--gold)); }
+  .kpi-card:nth-child(4)::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
+  .kpi-card:nth-child(5)::before { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
+  .kpi-card:nth-child(6)::before { background:linear-gradient(90deg,var(--purple),var(--blue)); }
+  .kpi-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:10px; }
+  .kpi-val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; }
+  .kpi-val.blue { color:var(--blue); }
+  .kpi-val.rose { color:var(--rose); }
+  .kpi-val.gold { color:var(--gold); }
+  .kpi-val.green { color:var(--green); }
+  .kpi-val.teal { color:var(--teal); }
+  .kpi-val.purple { color:var(--purple); }
+  .kpi-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:32px; opacity:.15; }
+
+  /* CHARTS ROW */
+  .row { display:grid; gap:18px; margin-bottom:18px; }
+  .row-3 { grid-template-columns:1fr 1fr 1fr; }
+  .row-2 { grid-template-columns:1.2fr 1fr; }
+  .row-2b { grid-template-columns:1fr 1.6fr 1fr; }
+
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px 22px; position:relative; transition:box-shadow .2s; }
+  .card:hover { box-shadow:0 8px 40px rgba(0,0,0,0.35); }
+  .card-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text); text-transform:uppercase; letter-spacing:.8px; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+  .card-title span.dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot-gold { background:var(--gold); }
+  .dot-rose { background:var(--rose); }
+  .dot-teal { background:var(--teal); }
+  .dot-blue { background:var(--blue); }
+  .dot-purple { background:var(--purple); }
+  .dot-green { background:var(--green); }
+  canvas { max-height:220px; }
+
+  /* TABLE */
+  .sat-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .sat-table th { color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.5px; padding:6px 8px; text-align:center; border-bottom:1px solid var(--border); }
+  .sat-table th:first-child { text-align:left; }
+  .sat-table td { padding:7px 8px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.03); transition:background .15s; }
+  .sat-table td:first-child { text-align:left; color:var(--text); }
+  .sat-table tr:hover td { background:rgba(255,255,255,0.03); }
+  .sat-table .total-row td { color:var(--gold); font-weight:600; border-top:1px solid var(--border); border-bottom:none; }
+  .sat-num { color:var(--muted); }
+  .sat-num.high { color:var(--teal); font-weight:600; }
+  .sat-num.total { color:var(--gold); font-weight:700; }
+
+  /* PROGRESS BARS (edu field) */
+  .edu-item { margin-bottom:13px; }
+  .edu-label { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+  .edu-label span:first-child { color:var(--text); }
+  .edu-label span:last-child { color:var(--muted); }
+  .edu-bar { height:7px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; }
+  .edu-fill { height:100%; border-radius:99px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+
+  /* LEGEND */
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
+  .legend-dot { width:9px; height:9px; border-radius:50%; }
+
+  /* FOOTER */
+  footer { text-align:center; color:var(--muted); font-size:11px; margin-top:28px; padding:16px; letter-spacing:.5px; }
+
+  @media(max-width:1100px) {
+    .kpi-grid { grid-template-columns:repeat(3,1fr); }
+    .row-3, .row-2, .row-2b { grid-template-columns:1fr; }
+  }
+  @media(max-width:600px) {
+    .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    .filters { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;background:linear-gradient(90deg,#f5c842,#00d4c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">HR Analytics</div>
+  <div class="loader-bar"><div class="loader-fill" id="lf"></div></div>
+  <p id="lmsg">Loading workforce data...</p>
+</div>
+
+<div class="wrapper" id="main" style="opacity:0;transition:opacity .6s;">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      <div>
+        <h1>HR Analytics Dashboard</h1>
+        <p>Workforce Intelligence · FY 2024 · 1,470 Employees</p>
+      </div>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterDept('All',this)">All Departments</button>
+      <button class="filter-btn" onclick="filterDept('R&D',this)">R&D</button>
+      <button class="filter-btn" onclick="filterDept('Sales',this)">Sales</button>
+      <button class="filter-btn" onclick="filterDept('HR',this)">Human Resources</button>
+    </div>
+  </header>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Employees</div>
+      <div class="kpi-val blue" id="k1">0</div>
+      <div class="kpi-icon">👥</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Attrition Count</div>
+      <div class="kpi-val rose" id="k2">0</div>
+      <div class="kpi-icon">📉</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Attrition Rate</div>
+      <div class="kpi-val gold" id="k3">0%</div>
+      <div class="kpi-icon">⚡</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Active Employees</div>
+      <div class="kpi-val green" id="k4">0</div>
+      <div class="kpi-icon">✅</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Age</div>
+      <div class="kpi-val teal" id="k5">0</div>
+      <div class="kpi-icon">🎂</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Monthly Pay</div>
+      <div class="kpi-val purple" id="k6">₹0</div>
+      <div class="kpi-icon">💰</div>
+    </div>
+  </div>
+
+  <!-- ROW 1 -->
+  <div class="row row-3">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span>Employees by Age Group & Gender</div>
+      <canvas id="ageGroupChart"></canvas>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-item"><div class="legend-dot" style="background:#f5c842"></div>Female</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4f8ef7"></div>Male</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-rose"></span>Attrition Trend by Age</div>
+      <canvas id="ageAttrChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-gold"></span>Department-wise Attrition</div>
+      <canvas id="deptChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="row row-2b">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-rose"></span>Attrition Rate by Job Role</div>
+      <canvas id="jobRoleChart"></canvas>
+    </div>
+    <div class="card" style="padding:18px;">
+      <div class="card-title"><span class="dot dot-teal"></span>Job Satisfaction Rating</div>
+      <table class="sat-table">
+        <thead>
+          <tr>
+            <th>Job Role</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="satTableBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span>Attrition by Education Field</div>
+      <div id="eduBars" style="margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="row row-3">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span>Gender Distribution</div>
+      <canvas id="genderChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-gold"></span>Business Travel Pattern</div>
+      <canvas id="travelChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-rose"></span>Overtime Impact on Attrition</div>
+      <canvas id="otChart"></canvas>
+    </div>
+  </div>
+
+  <footer>Built with real company data · HR Analytics Dashboard · © 2024 People Analytics Team</footer>
+</div>
+
+<script>
+// ===== DATA =====
+const DATA = {
+  all: {
+    total:1470, attrition:237, active:1233, avgAge:36.9, avgPay:6503, attrRate:16.12,
+    deptAttr: { labels:['R&D','Sales','HR'], vals:[133,92,12], pct:['56.12%','38.82%','5.06%'] },
+    ageGroup: {
+      labels:['Under 25','25-34','35-44','45-54','Over 55'],
+      female:[37,217,196,113,25], male:[60,337,309,132,44]
+    },
+    ageAttr: {
+      ages:[18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,55,58],
+      vals:[4,6,6,6,5,4,7,6,12,3,14,18,9,18,11,12,9,10,6,6,5,7,6,4,5,3,4,5,4,3,2,3,3,2,2,1,1,1]
+    },
+    jobRoles: ['Sales Rep','Lab Tech','Human Res','Sales Exec','Research Sci','Mfg Dir','Healthcare Rep','Manager','Research Dir'],
+    jobAttr:  [39.76, 23.94, 23.08, 17.48, 16.10, 6.90, 6.87, 4.90, 2.50],
+    eduField: { labels:['Life Sciences','Medical','Marketing','Technical Deg','Other','Human Res'], vals:[89,63,35,32,11,7] },
+    gender: { male:882, female:588 },
+    travel: { labels:['Travel Rarely','Travel Frequently','Non-Travel'], vals:[1043,277,150] },
+    ot: { labels:['No Overtime','Overtime'], attrition:[110,127], retain:[820,413] },
+    satTable: [
+      ['Healthcare Rep',26,19,43,43,131],
+      ['Human Resources',10,16,13,13,52],
+      ['Lab Technician',56,48,75,80,259],
+      ['Manager',21,21,27,33,102],
+      ['Mfg Director',26,32,49,38,145],
+      ['Research Director',15,16,27,22,80],
+      ['Research Scientist',54,53,90,95,292],
+      ['Sales Executive',69,54,91,112,326],
+      ['Sales Representative',12,21,27,23,83],
+    ]
+  }
+};
+
+// ===== LOADER =====
+const msgs = ['Loading workforce data...','Computing attrition metrics...','Rendering visualizations...','Almost ready ✨'];
+let li = 0;
+const lf = document.getElementById('lf'), lm = document.getElementById('lmsg');
+const lt = setInterval(()=>{ li++; lf.style.width=(li*25)+'%'; lm.textContent=msgs[li-1]||msgs[3]; if(li>=4){ clearInterval(lt); setTimeout(initDash,300); }}, 500);
+
+function initDash(){
+  document.getElementById('loader').style.opacity='0';
+  setTimeout(()=>{ document.getElementById('loader').style.display='none'; document.getElementById('main').style.opacity='1'; },500);
+  animateKPIs();
+  buildCharts();
+  buildEduBars();
+  buildSatTable();
+}
+
+// ===== ANIMATE KPIs =====
+function animateKPIs(){
+  const d = DATA.all;
+  animNum('k1', d.total);
+  animNum('k2', d.attrition);
+  animPct('k3', d.attrRate);
+  animNum('k4', d.active);
+  document.getElementById('k5').textContent = d.avgAge;
+  animCurr('k6', d.avgPay);
+}
+function animNum(id, target){ let v=0,s=target/60; const el=document.getElementById(id); const t=setInterval(()=>{ v=Math.min(v+s,target); el.textContent=Math.floor(v).toLocaleString(); if(v>=target)clearInterval(t);},16); }
+function animPct(id, target){ let v=0,s=target/60; const el=document.getElementById(id); const t=setInterval(()=>{ v=Math.min(v+s,target); el.textContent=v.toFixed(2)+'%'; if(v>=target)clearInterval(t);},16); }
+function animCurr(id, target){ let v=0,s=target/60; const el=document.getElementById(id); const t=setInterval(()=>{ v=Math.min(v+s,target); el.textContent='₹'+Math.floor(v).toLocaleString(); if(v>=target)clearInterval(t);},16); }
+
+// ===== CHART DEFAULTS =====
+Chart.defaults.color = '#6b7a99';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+const tooltipStyle = { backgroundColor:'#1a2235', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, titleColor:'#e8eaf0', bodyColor:'#6b7a99', padding:10, cornerRadius:8 };
+
+let charts = {};
+
+function buildCharts(){
+  const d = DATA.all;
+
+  // AGE GROUP BAR
+  charts.ageGroup = new Chart(document.getElementById('ageGroupChart'), {
+    type:'bar',
+    data:{ labels:d.ageGroup.labels,
+      datasets:[
+        { label:'Female', data:d.ageGroup.female, backgroundColor:'rgba(245,200,66,0.75)', borderRadius:5 },
+        { label:'Male',   data:d.ageGroup.male,   backgroundColor:'rgba(79,142,247,0.75)', borderRadius:5 }
+      ]},
+    options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{...tooltipStyle} }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.04)'}} }}
+  });
+
+  // AGE ATTRITION LINE
+  charts.ageAttr = new Chart(document.getElementById('ageAttrChart'), {
+    type:'line',
+    data:{ labels:d.ageAttr.ages,
+      datasets:[{ label:'Attritions', data:d.ageAttr.vals,
+        borderColor:'#ff6b6b', backgroundColor:'rgba(255,107,107,0.12)',
+        borderWidth:2.5, fill:true, tension:.4, pointRadius:2, pointHoverRadius:5 }]},
+    options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{...tooltipStyle} }, scales:{ x:{grid:{display:false}, ticks:{maxTicksLimit:8}}, y:{grid:{color:'rgba(255,255,255,0.04)'}} }}
+  });
+
+  // DEPT DONUT
+  charts.dept = new Chart(document.getElementById('deptChart'), {
+    type:'doughnut',
+    data:{ labels:d.deptAttr.labels,
+      datasets:[{ data:d.deptAttr.vals,
+        backgroundColor:['rgba(168,85,247,0.85)','rgba(245,200,66,0.85)','rgba(79,142,247,0.85)'],
+        borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, cutout:'62%',
+      plugins:{ legend:{position:'bottom', labels:{color:'#6b7a99',boxWidth:10,padding:12}}, tooltip:{...tooltipStyle,
+        callbacks:{ label:(c)=>` ${c.label}: ${c.raw} (${d.deptAttr.pct[c.dataIndex]})` } } } }
+  });
+
+  // JOB ROLE HORIZONTAL BAR
+  charts.jobRole = new Chart(document.getElementById('jobRoleChart'), {
+    type:'bar',
+    data:{ labels:d.jobRoles,
+      datasets:[{ label:'Attrition %', data:d.jobAttr,
+        backgroundColor: d.jobAttr.map(v => v>20 ? 'rgba(255,107,107,0.8)' : v>10 ? 'rgba(245,200,66,0.8)' : 'rgba(79,142,247,0.7)'),
+        borderRadius:4 }]},
+    options:{ indexAxis:'y', responsive:true,
+      plugins:{ legend:{display:false}, tooltip:{...tooltipStyle, callbacks:{label:(c)=>` ${c.raw}%`}} },
+      scales:{ x:{grid:{color:'rgba(255,255,255,0.04)'}, ticks:{callback:v=>v+'%'}, max:50}, y:{grid:{display:false}, ticks:{font:{size:11}}} }}
+  });
+
+  // GENDER DOUGHNUT
+  charts.gender = new Chart(document.getElementById('genderChart'), {
+    type:'doughnut',
+    data:{ labels:['Male','Female'],
+      datasets:[{ data:[d.gender.male, d.gender.female],
+        backgroundColor:['rgba(79,142,247,0.85)','rgba(245,200,66,0.85)'],
+        borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, cutout:'65%',
+      plugins:{ legend:{position:'bottom', labels:{color:'#6b7a99',boxWidth:10,padding:12}}, tooltip:{...tooltipStyle} } }
+  });
+
+  // TRAVEL DONUT
+  charts.travel = new Chart(document.getElementById('travelChart'), {
+    type:'doughnut',
+    data:{ labels:d.travel.labels,
+      datasets:[{ data:d.travel.vals,
+        backgroundColor:['rgba(0,212,200,0.8)','rgba(168,85,247,0.8)','rgba(245,200,66,0.8)'],
+        borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, cutout:'60%',
+      plugins:{ legend:{position:'bottom', labels:{color:'#6b7a99',boxWidth:10,padding:12}}, tooltip:{...tooltipStyle} } }
+  });
+
+  // OVERTIME STACKED BAR
+  charts.ot = new Chart(document.getElementById('otChart'), {
+    type:'bar',
+    data:{ labels:d.ot.labels,
+      datasets:[
+        { label:'Attrition', data:d.ot.attrition, backgroundColor:'rgba(255,107,107,0.8)', borderRadius:5 },
+        { label:'Retained',  data:d.ot.retain,    backgroundColor:'rgba(34,197,94,0.6)', borderRadius:5 }
+      ]},
+    options:{ responsive:true, plugins:{ legend:{position:'bottom', labels:{color:'#6b7a99',boxWidth:10,padding:12}}, tooltip:{...tooltipStyle} },
+      scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.04)'}, stacked:false} }}
+  });
+}
+
+// ===== EDU BARS =====
+function buildEduBars(){
+  const d = DATA.all.eduField;
+  const max = Math.max(...d.vals);
+  const colors = ['#4f8ef7','#f5c842','#00d4c8','#a855f7','#ff6b6b','#22c55e'];
+  const container = document.getElementById('eduBars');
+  container.innerHTML = '';
+  d.labels.forEach((label,i)=>{
+    const pct = Math.round(d.vals[i]/max*100);
+    container.innerHTML += `
+      <div class="edu-item">
+        <div class="edu-label"><span>${label}</span><span>${d.vals[i]}</span></div>
+        <div class="edu-bar"><div class="edu-fill" style="width:0%;background:${colors[i]}" data-w="${pct}%"></div></div>
+      </div>`;
+  });
+  setTimeout(()=>{ document.querySelectorAll('.edu-fill').forEach(el=>{ el.style.width=el.dataset.w; }); }, 600);
+}
+
+// ===== SAT TABLE =====
+function buildSatTable(){
+  const rows = DATA.all.satTable;
+  const total = [289,280,442,459,1470];
+  const tbody = document.getElementById('satTableBody');
+  rows.forEach(r=>{
+    const maxVal = Math.max(r[1],r[2],r[3],r[4]);
+    tbody.innerHTML += `<tr>
+      <td>${r[0]}</td>
+      ${[1,2,3,4].map(j=>`<td class="sat-num${r[j]===maxVal?' high':''}">${r[j]}</td>`).join('')}
+      <td class="sat-num total">${r[5]}</td>
+    </tr>`;
+  });
+  tbody.innerHTML += `<tr class="total-row"><td><strong>Total</strong></td>${total.map(v=>`<td>${v}</td>`).join('')}</tr>`;
+}
+
+// ===== DEPT FILTER =====
+function filterDept(dept, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Highlight relevant dept in donut
+  if(charts.dept){ charts.dept.destroy(); }
+  const deptIdx = { 'R&D':0, 'Sales':1, 'HR':2 };
+  const d = DATA.all.deptAttr;
+  const highlight = dept === 'All' ? ['rgba(168,85,247,0.85)','rgba(245,200,66,0.85)','rgba(79,142,247,0.85)'] :
+    d.labels.map((l,i)=> i === deptIdx[dept==='Human Resources'?'HR':dept] ? ['rgba(168,85,247,0.95)','rgba(245,200,66,0.95)','rgba(79,142,247,0.95)'][i] : 'rgba(255,255,255,0.1)');
+  charts.dept = new Chart(document.getElementById('deptChart'), {
+    type:'doughnut',
+    data:{ labels:d.labels, datasets:[{ data:d.vals, backgroundColor:highlight, borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, cutout:'62%', plugins:{ legend:{position:'bottom', labels:{color:'#6b7a99',boxWidth:10,padding:12}},
+      tooltip:{...{ backgroundColor:'#1a2235', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, titleColor:'#e8eaf0', bodyColor:'#6b7a99', padding:10, cornerRadius:8 },
+        callbacks:{ label:(c)=>` ${c.label}: ${c.raw} (${d.pct[c.dataIndex]})` } } } }
+  });
+}
+</script>
+</body>
+</html>
