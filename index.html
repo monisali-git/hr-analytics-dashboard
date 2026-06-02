@@ -230,7 +230,6 @@ footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: cent
     <span><b>Dashboard Alert:</b> Apni Excel file upload karo jisme Age, Attrition, Department, Job Role, aur Gender columns ho.</span>
   </div>
 
-  <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-top"><span class="kpi-label">Total Employees</span><span class="kpi-icon">👥</span></div>
@@ -270,7 +269,6 @@ footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: cent
     </div>
   </div>
 
-  <!-- OVERVIEW SECTION -->
   <div id="sec-overview" class="dash-section">
     <div class="grid-3">
       <div class="card">
@@ -335,7 +333,6 @@ footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: cent
     </div>
   </div>
 
-  <!-- ATTRITION SECTION -->
   <div id="sec-attrition" class="dash-section hidden">
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-box-label">Total Exits</div><div class="stat-box-val" id="a-total" style="color:var(--red)">0</div><div class="stat-box-sub">Employees who left</div></div>
@@ -371,7 +368,6 @@ footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: cent
     </div>
   </div>
 
-  <!-- WORKFORCE SECTION -->
   <div id="sec-workforce" class="dash-section hidden">
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-box-label">Total Headcount</div><div class="stat-box-val" id="w-total" style="color:var(--blue)">0</div><div class="stat-box-sub">All employees</div></div>
@@ -405,7 +401,6 @@ footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: cent
     </div>
   </div>
 
-  <!-- SATISFACTION SECTION -->
   <div id="sec-satisfaction" class="dash-section hidden">
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-box-label">Avg Job Satisfaction</div><div class="stat-box-val" id="s-job" style="color:var(--teal)">0</div><div class="stat-box-sub">Scale 1–4</div></div>
@@ -777,14 +772,14 @@ function processAndRender(jsonData) {
   let ageG = { f: [0,0,0,0,0], m: [0,0,0,0,0] };
   let ageAttrCount = [0,0,0,0,0], ageRetainCount = [0,0,0,0,0], ageTotalCount = [0,0,0,0,0];
   let ageIncomeSum = [0,0,0,0,0];
-  let deptMap = {}, deptTotal = {}, roleData = {}, eduMap = {}, eduTotal = {};
+  let deptMap = {}, deptTotal = {}, roleData = {}, eduMap = {};
   let travelMap = {}, travelAttr = {};
   let genderCount = { male: 0, female: 0 };
   let otMap = { 'No Overtime': {left:0,stay:0}, 'Overtime': {left:0,stay:0} };
   let wlbMap = {1:0,2:0,3:0,4:0}, wlbAll = {1:0,2:0,3:0,4:0};
   let satMap = {1:0,2:0,3:0,4:0}, satAttrMap = {1:0,2:0,3:0,4:0}, satStayMap = {1:0,2:0,3:0,4:0};
   let envMap = {1:0,2:0,3:0,4:0};
-  let maritalAttr = {}, maritalTotal = {};
+  let maritalAttr = {};
   let eduLvlMap = {};
 
   jsonData.forEach(row => {
@@ -829,7 +824,6 @@ function processAndRender(jsonData) {
 
     let edu = String(getVal(row,'educationfield','educfield')||'Other').trim();
     if (isLeft) eduMap[edu] = (eduMap[edu]||0)+1;
-    eduTotal[edu] = (eduTotal[edu]||0)+1;
 
     let eduLvl = String(getVal(row,'education')||'').trim();
     if (eduLvl) eduLvlMap[eduLvl] = (eduLvlMap[eduLvl]||0)+1;
@@ -1058,7 +1052,7 @@ async function exportPDF() {
     console.error(err); alert('PDF export error: '+err.message);
   } finally {
     overlay.classList.remove('show'); btn.disabled=false;
-  }
+  }  
 }
 </script>
 </body>
