@@ -5,146 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HR Analytics — People Intelligence</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --ink:       #0f1111;
-  --ink2:      #232f3e;
-  --ink3:      #37475a;
-  --body:      #f3f3f3;
-  --white:     #ffffff;
-  --border:    #e3e6e6;
-  --border2:   #d5d9d9;
-  --orange:    #ff9900;
-  --orange2:   #e47911;
-  --teal:      #007185;
-  --teal2:     #00a8c5;
-  --red:       #c40000;
-  --green:     #007600;
-  --green2:    #067d62;
-  --blue:      #146eb4;
+  --ink: #0f1111; --ink2: #232f3e; --ink3: #37475a;
+  --body: #f3f3f3; --white: #ffffff;
+  --border: #e3e6e6; --border2: #d5d9d9;
+  --orange: #ff9900; --orange2: #e47911;
+  --teal: #007185; --teal2: #00a8c5;
+  --red: #c40000; --green: #007600; --green2: #067d62;
+  --blue: #146eb4;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.06);
   --shadow-md: 0 2px 5px rgba(0,0,0,.13), 0 0 0 1px rgba(0,0,0,.06);
-  --radius:    8px;
+  --radius: 8px;
 }
+body { background: var(--body); color: var(--ink); font-family: 'Outfit', 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
 
-body {
-  background: var(--body);
-  color: var(--ink);
-  font-family: 'Outfit', 'Segoe UI', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* ─── TOPBAR ──────────────────────────────────── */
-.topbar {
-  background: var(--ink2);
-  padding: 0 24px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+/* TOPBAR */
+.topbar { background: var(--ink2); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .topbar-left { display: flex; align-items: center; gap: 20px; }
-.brand {
-  font-weight: 700;
-  font-size: 20px;
-  color: #fff;
-  letter-spacing: -.3px;
-}
+.brand { font-weight: 700; font-size: 20px; color: #fff; letter-spacing: -.3px; }
 .brand span { color: var(--orange); }
 .nav-pill {
   background: transparent;
   border: 1px solid rgba(255,255,255,.35);
-  color: #fff;
+  color: rgba(255,255,255,.75);
   padding: 5px 14px;
   border-radius: 3px;
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
-  transition: border-color .15s, background .15s;
+  transition: all .2s;
+  position: relative;
 }
-.nav-pill:hover, .nav-pill.active { border-color: #fff; background: rgba(255,255,255,.08); }
-.nav-pill.active { border-color: var(--orange); color: var(--orange); }
+.nav-pill:hover { border-color: rgba(255,255,255,.7); color: #fff; background: rgba(255,255,255,.08); }
+.nav-pill.active {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(255,153,0,.15);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(255,153,0,.3), 0 2px 8px rgba(255,153,0,.2);
+}
 .topbar-right { display: flex; align-items: center; gap: 10px; }
-.badge {
-  background: var(--orange);
-  color: #111;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 3px;
-  letter-spacing: .3px;
-}
+.badge { background: var(--orange); color: #111; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 3px; letter-spacing: .3px; }
 
-/* ─── SUBBAR ──────────────────────────────────── */
-.subbar {
-  background: var(--ink3);
-  padding: 0 24px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-}
+/* SUBBAR */
+.subbar { background: var(--ink3); padding: 0 24px; height: 40px; display: flex; align-items: center; gap: 4px; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,.06); }
 .sub-link {
-  color: rgba(255,255,255,.85);
+  color: rgba(255,255,255,.7);
   font-size: 12.5px;
   white-space: nowrap;
-  padding: 0 10px;
-  height: 36px;
+  padding: 0 14px;
+  height: 40px;
   display: flex;
   align-items: center;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color .15s, border-color .15s;
+  transition: all .2s;
+  border-radius: 3px 3px 0 0;
 }
-.sub-link:hover { color: #fff; border-bottom-color: var(--orange); }
+.sub-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+.sub-link.active-dept {
+  color: #fff;
+  border-bottom-color: var(--orange);
+  background: rgba(255,153,0,.1);
+  font-weight: 600;
+}
 
-/* ─── WRAPPER ─────────────────────────────────── */
+/* WRAPPER */
 .page { max-width: 1380px; margin: 0 auto; padding: 20px 20px 40px; }
-
-/* ─── BREADCRUMB ──────────────────────────────── */
 .breadcrumb { font-size: 12px; color: var(--teal); margin-bottom: 14px; }
 .breadcrumb span { color: var(--ink3); }
-
-/* ─── PAGE TITLE ──────────────────────────────── */
 .page-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
 .page-title h1 { font-size: 24px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
 .page-title p { color: #565959; font-size: 13px; margin-top: 3px; }
-.export-btn {
-  background: linear-gradient(180deg, #f7dfa5, #f0c14b);
-  border: 1px solid #a88734;
-  color: var(--ink);
-  padding: 8px 18px;
-  border-radius: 3px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s;
-}
-.export-btn:hover { background: linear-gradient(180deg, #f5d78e, #eeb933); }
+.export-btn { background: linear-gradient(180deg,#f7dfa5,#f0c14b); border: 1px solid #a88734; color: var(--ink); padding: 8px 18px; border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.export-btn:hover { background: linear-gradient(180deg,#f5d78e,#eeb933); }
+.export-btn:disabled { opacity: .6; cursor: not-allowed; }
 
-/* ─── KPI ROW ─────────────────────────────────── */
-.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
-
-.kpi {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow .2s;
-  cursor: default;
-}
+/* KPI ROW */
+.kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 18px; }
+.kpi { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); transition: box-shadow .2s; cursor: default; }
 .kpi:hover { box-shadow: var(--shadow-md); }
 .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .kpi-label { font-size: 12px; color: #565959; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
@@ -156,54 +102,27 @@ body {
 .kpi-sub.dn b { color: var(--red); }
 .kpi-accent { height: 3px; border-radius: 99px; margin-top: 10px; }
 
-/* ─── GRID LAYOUTS ────────────────────────────── */
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+/* GRID LAYOUTS */
+.grid-3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
 .grid-2l { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; margin-bottom: 14px; }
 .grid-2r { display: grid; grid-template-columns: 1fr 1.15fr; gap: 14px; margin-bottom: 14px; }
 .grid-3b { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.grid-2  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.grid-full { margin-bottom: 14px; }
 
-/* ─── CARD ────────────────────────────────────── */
-.card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: box-shadow .2s;
-}
+/* CARD */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; transition: box-shadow .2s; }
 .card:hover { box-shadow: var(--shadow-md); }
-
-.card-head {
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.card-title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: -.1px;
-}
+.card-head { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 13.5px; font-weight: 700; color: var(--ink); letter-spacing: -.1px; }
 .card-meta { font-size: 11px; color: #8d9499; }
 .card-body { padding: 16px 18px; }
 .card-body canvas { max-height: 210px; }
 
-/* ─── TABLE ───────────────────────────────────── */
+/* TABLE */
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .data-table thead tr { background: #f7f8f8; }
-.data-table th {
-  padding: 9px 10px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #565959;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  border-bottom: 2px solid var(--border2);
-  white-space: nowrap;
-}
+.data-table th { padding: 9px 10px; text-align: center; font-size: 11px; font-weight: 700; color: #565959; text-transform: uppercase; letter-spacing: .4px; border-bottom: 2px solid var(--border2); white-space: nowrap; }
 .data-table th:first-child { text-align: left; }
 .data-table td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--border); color: #444; }
 .data-table td:first-child { text-align: left; font-weight: 500; color: var(--ink); }
@@ -212,7 +131,7 @@ body {
 .data-table .foot-row td { background: #f7f8f8; font-weight: 700; color: var(--orange2); border-top: 2px solid var(--border2); font-size: 13px; }
 .cell-hi { color: var(--teal); font-weight: 700; }
 
-/* ─── PROGRESS BARS ───────────────────────────── */
+/* PROGRESS BARS */
 .prog-item { margin-bottom: 12px; }
 .prog-item:last-child { margin-bottom: 0; }
 .prog-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; color: var(--ink); }
@@ -220,57 +139,58 @@ body {
 .prog-track { height: 8px; background: #f0f2f2; border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
 .prog-fill { height: 100%; border-radius: 99px; transition: width 1.1s cubic-bezier(.4,0,.2,1); }
 
-/* ─── LEGEND ──────────────────────────────────── */
+/* LEGEND */
 .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
 .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #565959; }
 .leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
-/* ─── INSIGHT BANNER ──────────────────────────── */
-.insight {
-  background: #fef9e7;
-  border: 1px solid #f0c14b;
-  border-left: 4px solid var(--orange);
-  border-radius: var(--radius);
-  padding: 12px 18px;
-  font-size: 13px;
-  color: var(--ink);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* INSIGHT BANNER */
+.insight { border-radius: var(--radius); padding: 12px 18px; font-size: 13px; color: var(--ink); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.insight.warn { background: #fef9e7; border: 1px solid #f0c14b; border-left: 4px solid var(--orange); }
+.insight.success { background: #eafaf1; border: 1px solid #a9dfbf; border-left: 4px solid var(--green); }
 .insight-icon { font-size: 18px; flex-shrink: 0; }
 
-/* ─── FOOTER ──────────────────────────────────── */
-footer {
-  background: var(--ink2);
-  color: rgba(255,255,255,.55);
-  text-align: center;
-  font-size: 11.5px;
-  padding: 16px;
-  margin-top: 30px;
-  letter-spacing: .3px;
-}
+/* SECTION TRANSITION */
+.dash-section { transition: opacity .35s, transform .35s; }
+.dash-section.hidden { display: none; }
+.dash-section.faded { opacity: 0.18; pointer-events: none; filter: blur(1px); }
+
+/* STAT ROW for attrition/workforce sections */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 14px; }
+.stat-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow-sm); }
+.stat-box-label { font-size: 11.5px; color: #565959; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.stat-box-val { font-size: 22px; font-weight: 700; }
+.stat-box-sub { font-size: 11px; color: #8d9499; margin-top: 2px; }
+
+/* PDF OVERLAY */
+#pdfOverlay { display: none; position: fixed; inset: 0; background: rgba(15,17,17,.75); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: #fff; font-size: 16px; font-family: 'Outfit', sans-serif; }
+#pdfOverlay.show { display: flex; }
+.pdf-spinner { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,.2); border-top-color: var(--orange); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+footer { background: var(--ink2); color: rgba(255,255,255,.55); text-align: center; font-size: 11.5px; padding: 16px; margin-top: 30px; letter-spacing: .3px; }
 
 @media (max-width: 1100px) {
-  .kpi-row { grid-template-columns: repeat(3, 1fr); }
-  .grid-3, .grid-2l, .grid-2r, .grid-3b { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: repeat(3,1fr); }
+  .grid-3,.grid-2l,.grid-2r,.grid-3b,.grid-2,.stat-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 600px) {
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 600px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
+<div id="pdfOverlay">
+  <div class="pdf-spinner"></div>
+  <span id="pdfMsg">📄 Dashboard PDF bana raha hai...</span>
+</div>
+
 <div class="topbar">
   <div class="topbar-left">
     <div class="brand">People<span>Analytics</span></div>
-    <button class="nav-pill active">Overview</button>
-    <button class="nav-pill">Attrition</button>
-    <button class="nav-pill">Workforce</button>
-    <button class="nav-pill">Satisfaction</button>
+    <button class="nav-pill active" onclick="showSection('overview',this)">Overview</button>
+    <button class="nav-pill" onclick="showSection('attrition',this)">Attrition</button>
+    <button class="nav-pill" onclick="showSection('workforce',this)">Workforce</button>
+    <button class="nav-pill" onclick="showSection('satisfaction',this)">Satisfaction</button>
   </div>
   <div class="topbar-right">
     <span class="badge">FY 2024</span>
@@ -278,15 +198,14 @@ footer {
   </div>
 </div>
 
-<!-- SUBBAR -->
 <div class="subbar">
-  <div class="sub-link" onclick="filterDept('All',this)" style="border-bottom-color:var(--orange);color:#fff;">All Departments</div>
+  <div class="sub-link active-dept" onclick="filterDept('All',this)">All Departments</div>
   <div class="sub-link" onclick="filterDept('R&D',this)">Research &amp; Development</div>
   <div class="sub-link" onclick="filterDept('Sales',this)">Sales</div>
   <div class="sub-link" onclick="filterDept('HR',this)">Human Resources</div>
 </div>
 
-<div class="page">
+<div class="page" id="dashboardPage">
   <div class="breadcrumb">
     <a style="color:var(--teal);text-decoration:none;">Home</a> &rsaquo;
     <a style="color:var(--teal);text-decoration:none;">Analytics</a> &rsaquo;
@@ -296,18 +215,19 @@ footer {
   <div class="page-title">
     <div>
       <h1>HR Analytics Dashboard</h1>
-      <p>Interactive HR dashboard with auto-dynamic mapping and clear text visibility.</p>
+      <p>Interactive HR dashboard — upload your Excel file to see all charts live.</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="export-btn" onclick="document.getElementById('fileUpload').click()">⬆ Upload Data</button>
-      <button class="export-btn" onclick="exportReport()">⬇ Export Report</button>
+      <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+      <button class="export-btn" onclick="exportPDF()" id="pdfBtn">📄 Export PDF</button>
     </div>
   </div>
 
-  <div class="insight">
+  <div class="insight warn" id="alertBanner">
     <span class="insight-icon">⚠️</span>
-    <span><b>Dashboard Alert:</b> Please ensure your uploaded file contains headers like Age, Attrition, Department, Job Role, and Gender to populate all charts accurately.</span>
+    <span><b>Dashboard Alert:</b> Apni Excel file upload karo jisme Age, Attrition, Department, Job Role, aur Gender columns ho.</span>
   </div>
 
   <!-- KPIs -->
@@ -344,292 +264,801 @@ footer {
     </div>
     <div class="kpi">
       <div class="kpi-top"><span class="kpi-label">Avg Monthly Pay</span><span class="kpi-icon">💼</span></div>
-      <div class="kpi-value" id="k6">₹0</div>
+      <div class="kpi-value" id="k6">0</div>
       <div class="kpi-sub">Per employee / month</div>
       <div class="kpi-accent" style="background:linear-gradient(90deg,#232f3e,#37475a)"></div>
     </div>
   </div>
 
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-head"><span class="card-title">Employees by Age Group &amp; Gender</span><span class="card-meta">Total Count</span></div>
-      <div class="card-body">
-        <canvas id="ageGroupChart"></canvas>
-        <div class="legend" style="margin-top:12px;">
-          <div class="leg"><div class="leg-dot" style="background:#ff9900"></div>Female</div>
-          <div class="leg"><div class="leg-dot" style="background:#146eb4"></div>Male</div>
+  <!-- OVERVIEW SECTION -->
+  <div id="sec-overview" class="dash-section">
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Employees by Age Group &amp; Gender</span><span class="card-meta">Total Count</span></div>
+        <div class="card-body">
+          <canvas id="ageGroupChart"></canvas>
+          <div class="legend" style="margin-top:12px;">
+            <div class="leg"><div class="leg-dot" style="background:#ff9900"></div>Female</div>
+            <div class="leg"><div class="leg-dot" style="background:#146eb4"></div>Male</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition Trend by Age Group</span><span class="card-meta">Exits by Age Band</span></div>
+        <div class="card-body"><canvas id="ageAttrChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Department-wise Exits</span><span class="card-meta" id="deptMeta">All Departments</span></div>
+        <div class="card-body"><canvas id="deptChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2l">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition Rate by Job Role</span><span class="card-meta">% of role headcount</span></div>
+        <div class="card-body"><canvas id="jobRoleChart" style="max-height:240px;"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Job Satisfaction Rating</span><span class="card-meta">Score 1 (Low) → 4 (High)</span></div>
+        <div class="card-body" style="padding:12px 14px;">
+          <table class="data-table">
+            <thead>
+              <tr><th style="text-align:left;">Job Role</th><th>1</th><th>2</th><th>3</th><th>4</th><th>Total</th></tr>
+            </thead>
+            <tbody id="satTbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Attrition Trend by Age</span><span class="card-meta">Exits by Age</span></div>
-      <div class="card-body"><canvas id="ageAttrChart"></canvas></div>
+    <div class="grid-3b">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition by Education Field</span><span class="card-meta">Employee exits per field</span></div>
+        <div class="card-body" id="eduBars"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Gender Distribution</span><span class="card-meta">Total workforce</span></div>
+        <div class="card-body"><canvas id="genderChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Overtime vs Attrition</span><span class="card-meta">Impact analysis</span></div>
+        <div class="card-body"><canvas id="otChart"></canvas></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Department-wise Exits</span><span class="card-meta" id="deptMeta">All Departments</span></div>
-      <div class="card-body"><canvas id="deptChart"></canvas></div>
-    </div>
-  </div>
-
-  <div class="grid-2l">
-    <div class="card">
-      <div class="card-head"><span class="card-title">Attrition Rate by Job Role</span><span class="card-meta">% of role headcount</span></div>
-      <div class="card-body"><canvas id="jobRoleChart" style="max-height:240px;"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Job Satisfaction Rating</span><span class="card-meta">Score 1 (Low) → 4 (High)</span></div>
-      <div class="card-body" style="padding:12px 14px;">
-        <table class="data-table">
-          <thead>
-            <tr><th style="text-align:left;">Job Role</th><th>1</th><th>2</th><th>3</th><th>4</th><th>Total</th></tr>
-          </thead>
-          <tbody id="satTbody"></tbody>
-        </table>
+    <div class="grid-2r">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Business Travel Pattern</span><span class="card-meta">Travel frequency distribution</span></div>
+        <div class="card-body"><canvas id="travelChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Work-Life Balance vs Attrition</span><span class="card-meta">Balance rating (1 = Poor → 4 = Excellent)</span></div>
+        <div class="card-body"><canvas id="wlbChart"></canvas></div>
       </div>
     </div>
   </div>
 
-  <div class="grid-3b">
-    <div class="card">
-      <div class="card-head"><span class="card-title">Attrition by Education Field</span><span class="card-meta">Employee exits per field</span></div>
-      <div class="card-body" id="eduBars"></div>
+  <!-- ATTRITION SECTION -->
+  <div id="sec-attrition" class="dash-section hidden">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-box-label">Total Exits</div><div class="stat-box-val" id="a-total" style="color:var(--red)">0</div><div class="stat-box-sub">Employees who left</div></div>
+      <div class="stat-box"><div class="stat-box-label">Attrition Rate</div><div class="stat-box-val" id="a-rate" style="color:var(--orange2)">0%</div><div class="stat-box-sub">vs 10% industry avg</div></div>
+      <div class="stat-box"><div class="stat-box-label">Overtime Attrition</div><div class="stat-box-val" id="a-ot" style="color:var(--red)">0</div><div class="stat-box-sub">Left with overtime</div></div>
+      <div class="stat-box"><div class="stat-box-label">Highest Risk Group</div><div class="stat-box-val" id="a-risk" style="color:var(--orange2);font-size:16px;">—</div><div class="stat-box-sub">Age group most at risk</div></div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Gender Distribution</span><span class="card-meta">Total workforce</span></div>
-      <div class="card-body"><canvas id="genderChart"></canvas></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition by Age Group</span><span class="card-meta">Exits per age band</span></div>
+        <div class="card-body"><canvas id="attrAgeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition by Department</span><span class="card-meta">Department breakdown</span></div>
+        <div class="card-body"><canvas id="attrDeptChart"></canvas></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Overtime vs Attrition</span><span class="card-meta">Impact analysis</span></div>
-      <div class="card-body"><canvas id="otChart"></canvas></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Marital Status &amp; Attrition</span><span class="card-meta">Status-wise exits</span></div>
+        <div class="card-body"><canvas id="attrMaritalChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Business Travel &amp; Attrition</span><span class="card-meta">Travel impact on exits</span></div>
+        <div class="card-body"><canvas id="attrTravelChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Attrition Rate by Job Role (Detailed)</span><span class="card-meta">% exits of total per role</span></div>
+        <div class="card-body"><canvas id="attrRoleChart" style="max-height:260px;"></canvas></div>
+      </div>
     </div>
   </div>
 
-  <div class="grid-2r">
-    <div class="card">
-      <div class="card-head"><span class="card-title">Business Travel Pattern</span><span class="card-meta">Travel frequency distribution</span></div>
-      <div class="card-body"><canvas id="travelChart"></canvas></div>
+  <!-- WORKFORCE SECTION -->
+  <div id="sec-workforce" class="dash-section hidden">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-box-label">Total Headcount</div><div class="stat-box-val" id="w-total" style="color:var(--blue)">0</div><div class="stat-box-sub">All employees</div></div>
+      <div class="stat-box"><div class="stat-box-label">Male Employees</div><div class="stat-box-val" id="w-male" style="color:var(--blue)">0</div><div class="stat-box-sub">Total male workforce</div></div>
+      <div class="stat-box"><div class="stat-box-label">Female Employees</div><div class="stat-box-val" id="w-female" style="color:var(--orange2)">0</div><div class="stat-box-sub">Total female workforce</div></div>
+      <div class="stat-box"><div class="stat-box-label">Avg Tenure</div><div class="stat-box-val" id="w-tenure" style="color:var(--teal)">0</div><div class="stat-box-sub">Avg years at company</div></div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">Work-Life Balance vs Attrition</span><span class="card-meta">Balance rating (1 = Poor → 4 = Excellent)</span></div>
-      <div class="card-body"><canvas id="wlbChart"></canvas></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Age Group Distribution</span><span class="card-meta">Total by age band</span></div>
+        <div class="card-body"><canvas id="wfAgeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Department Headcount</span><span class="card-meta">Employees per department</span></div>
+        <div class="card-body"><canvas id="wfDeptChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Education Level</span><span class="card-meta">Qualification breakdown</span></div>
+        <div class="card-body"><canvas id="wfEduChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Job Role Headcount</span><span class="card-meta">Staff per role</span></div>
+        <div class="card-body"><canvas id="wfRoleChart" style="max-height:240px;"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Income Distribution by Age Group</span><span class="card-meta">Avg monthly income</span></div>
+        <div class="card-body"><canvas id="wfIncomeChart"></canvas></div>
+      </div>
     </div>
   </div>
+
+  <!-- SATISFACTION SECTION -->
+  <div id="sec-satisfaction" class="dash-section hidden">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-box-label">Avg Job Satisfaction</div><div class="stat-box-val" id="s-job" style="color:var(--teal)">0</div><div class="stat-box-sub">Scale 1–4</div></div>
+      <div class="stat-box"><div class="stat-box-label">Avg Env Satisfaction</div><div class="stat-box-val" id="s-env" style="color:var(--green)">0</div><div class="stat-box-sub">Scale 1–4</div></div>
+      <div class="stat-box"><div class="stat-box-label">Avg Work-Life Balance</div><div class="stat-box-val" id="s-wlb" style="color:var(--blue)">0</div><div class="stat-box-sub">Scale 1–4</div></div>
+      <div class="stat-box"><div class="stat-box-label">Overtime Workers</div><div class="stat-box-val" id="s-ot" style="color:var(--orange2)">0</div><div class="stat-box-sub">Employees on overtime</div></div>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Job Satisfaction Distribution</span><span class="card-meta">Score 1–4</span></div>
+        <div class="card-body"><canvas id="satDistChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Environment Satisfaction</span><span class="card-meta">Score 1–4</span></div>
+        <div class="card-body"><canvas id="envSatChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Work-Life Balance Distribution</span><span class="card-meta">Score 1–4</span></div>
+        <div class="card-body"><canvas id="wlbDistChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2l">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Job Satisfaction by Role</span><span class="card-meta">Avg score per role</span></div>
+        <div class="card-body"><canvas id="satRoleChart" style="max-height:240px;"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Satisfaction vs Attrition</span><span class="card-meta">Low sat = high risk</span></div>
+        <div class="card-body"><canvas id="satAttrChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <footer>People Analytics Dashboard &nbsp;·&nbsp; FY 2024 &nbsp;·&nbsp; Built on Company HR Data</footer>
 
 <script>
 window.rawUploadedData = null;
+window.fullData = [];
+window.currentDept = 'All';
+window.currentSection = 'overview';
+window.processedStats = {};
 
-// The critical fix: High visibility datalabels style!
-const LABELS_STYLE = {
-  color: '#0f1111',               // Dark text for strong contrast
-  font: { weight: '800', size: 13 },
-  textStrokeColor: '#ffffff',     // White outline protects text on dark/light backgrounds
-  textStrokeWidth: 4,
-  formatter: (v, ctx) => {
-    if(ctx.chart.config.type === 'doughnut'){
-      const data = ctx.chart.data.datasets[0].data;
-      const total = data.reduce((a,b)=>a+b,0);
-      return total > 0 ? ((v/total)*100).toFixed(1)+'%' : '0%';
-    }
-    return typeof v === 'number' ? (v % 1 === 0 ? v : v.toFixed(1)) : v;
+// AGE GROUP LABEL MAPPER — fixes Under 25 bug
+const AGE_GROUP_LABELS = ['Under 25','25–34','35–44','45–54','Over 55'];
+// Maps both string-based "Age Group" column AND raw numeric age
+function getAgeGroupIndex(row) {
+  const ag = String(getVal(row, 'agegroup', 'age group', 'ageband') || '').trim().toLowerCase();
+  if (ag === 'under 25' || ag === '<25') return 0;
+  if (ag === '25 - 34' || ag === '25-34' || ag === '25 to 34') return 1;
+  if (ag === '35 - 44' || ag === '35-44' || ag === '35 to 44') return 2;
+  if (ag === '45 - 54' || ag === '45-54' || ag === '45 to 54') return 3;
+  if (ag === 'over 55' || ag === '>55' || ag === '55+') return 4;
+  // Fallback to numeric age
+  const age = parseInt(getVal(row, 'age'));
+  if (!isNaN(age)) {
+    if (age < 25) return 0;
+    if (age <= 34) return 1;
+    if (age <= 44) return 2;
+    if (age <= 54) return 3;
+    return 4;
   }
+  return -1;
+}
+
+const getVal = (row, ...keys) => {
+  for (let k of Object.keys(row)) {
+    const cleanKey = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (let searchKey of keys) {
+      const cleanSearch = searchKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanKey === cleanSearch || cleanKey.includes(cleanSearch)) return row[k];
+    }
+  }
+  return null;
 };
 
+// CHART DEFAULTS
 Chart.defaults.font.family = "'Outfit', sans-serif";
 Chart.defaults.font.size = 12;
 Chart.defaults.color = '#565959';
 Chart.defaults.borderColor = '#e3e6e6';
 Chart.register(ChartDataLabels);
 
-const TT = {
-  backgroundColor: '#fff', borderColor: '#d5d9d9', borderWidth: 1, titleColor: '#0f1111', bodyColor: '#565959', padding: 10, cornerRadius: 6, boxShadow: '0 2px 8px rgba(0,0,0,.15)'
+const TT = { backgroundColor: '#fff', borderColor: '#d5d9d9', borderWidth: 1, titleColor: '#0f1111', bodyColor: '#565959', padding: 10, cornerRadius: 6 };
+
+// Datalabels styles
+const DL_BAR = {
+  color: '#fff',
+  font: { weight: '700', size: 11 },
+  anchor: 'center', align: 'center',
+  display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+  formatter: (v) => v > 0 ? v : ''
+};
+const DL_BAR_OUTER = {
+  color: '#232f3e',
+  font: { weight: '700', size: 11 },
+  anchor: 'end', align: 'top',
+  display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+  formatter: (v) => v > 0 ? v : ''
+};
+const DL_DONUT = {
+  color: '#fff',
+  font: { weight: '700', size: 12 },
+  display: (ctx) => {
+    const v = ctx.dataset.data[ctx.dataIndex];
+    const total = ctx.dataset.data.reduce((a,b)=>a+b, 0);
+    return total > 0 && (v/total) > 0.04;
+  },
+  formatter: (v, ctx) => {
+    const total = ctx.dataset.data.reduce((a,b)=>a+b, 0);
+    return total > 0 ? ((v/total)*100).toFixed(1)+'%' : '';
+  }
+};
+const DL_LINE = {
+  color: '#c40000',
+  font: { weight: '700', size: 11 },
+  anchor: 'top', align: 'top',
+  display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+  formatter: (v) => v > 0 ? v : ''
+};
+const DL_HBAR = {
+  color: '#fff',
+  font: { weight: '700', size: 11 },
+  anchor: 'center', align: 'center',
+  display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+  formatter: (v) => v+'%'
 };
 
-// Initialize empty charts
-let ageGroupChart = new Chart('ageGroupChart', { type:'bar', data:{ labels:[], datasets:[{ label:'Female', data:[], backgroundColor:'rgba(255,153,0,0.8)'}, { label:'Male', data:[], backgroundColor:'rgba(20,110,180,0.8)'}]}, options:{ responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{display:false}, tooltip:{...TT} }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }});
-let ageAttrChart = new Chart('ageAttrChart', { type:'line', data:{ labels:[], datasets:[{ label:'Attritions', data:[], borderColor:'#c40000', backgroundColor:'rgba(196,0,0,.07)', fill:true, tension:.4, borderWidth:2 }]}, options:{ responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{display:false}, tooltip:{...TT} }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }});
-let deptChart = new Chart('deptChart', { type:'doughnut', data:{ labels:[], datasets:[{ data:[], backgroundColor:['#146eb4','#ff9900','#007185','#c40000','#565959'], borderWidth:2, borderColor:'#fff'}]}, options:{ cutout:'58%', responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{position:'bottom'}, tooltip:{...TT} } }});
-let jobRoleChart = new Chart('jobRoleChart', { type:'bar', data:{ labels:[], datasets:[{ label:'Attrition %', data:[], backgroundColor:'rgba(20,110,180,.7)'}]}, options:{ indexAxis:'y', responsive:true, plugins:{ datalabels:{...LABELS_STYLE, anchor:'end', align:'right', formatter:(v)=>v+'%'}, legend:{display:false}, tooltip:{...TT} }, scales:{ x:{ max: 100 } } }});
-let genderChart = new Chart('genderChart', { type:'doughnut', data:{ labels:[], datasets:[{ data:[], backgroundColor:['#146eb4','#ff9900'], borderWidth:2, borderColor:'#fff'}]}, options:{ cutout:'60%', responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{position:'bottom'}, tooltip:{...TT} } }});
-let otChart = new Chart('otChart', { type:'bar', data:{ labels:['No Overtime', 'Overtime'], datasets:[{ label:'Left', data:[], backgroundColor:'rgba(196,0,0,.8)'}, { label:'Retained', data:[], backgroundColor:'rgba(0,118,0,.7)'}]}, options:{ responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{position:'bottom'}, tooltip:{...TT} }, scales:{ x:{grid:{display:false}} } }});
-let travelChart = new Chart('travelChart', { type:'doughnut', data:{ labels:[], datasets:[{ data:[], backgroundColor:['#007185','#ff9900','#232f3e','#c40000'], borderWidth:2, borderColor:'#fff'}]}, options:{ cutout:'55%', responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{position:'bottom'}, tooltip:{...TT} } }});
-let wlbChart = new Chart('wlbChart', { type:'bar', data:{ labels:['1 — Poor','2 — Fair','3 — Good','4 — Excellent'], datasets:[{ label:'Attritions', data:[], backgroundColor:['rgba(196,0,0,.8)','rgba(228,121,17,.8)','rgba(0,118,0,.75)','rgba(20,110,180,.8)']}]}, options:{ responsive:true, plugins:{ datalabels:LABELS_STYLE, legend:{display:false}, tooltip:{...TT} }, scales:{ x:{grid:{display:false}} } }});
+// INITIALIZE CHARTS
+const mkChart = (id, cfg) => new Chart(id, cfg);
 
-// Smarter column matching logic to avoid 0 values
-const getVal = (row, ...keys) => {
-    for (let k of Object.keys(row)) {
-        const cleanKey = k.toLowerCase().replace(/[^a-z0-9]/g, '');
-        for(let searchKey of keys) {
-            if(cleanKey === searchKey || cleanKey.includes(searchKey)) return row[k];
-        }
+let ageGroupChart = mkChart('ageGroupChart', {
+  type: 'bar',
+  data: { labels: AGE_GROUP_LABELS, datasets: [
+    { label: 'Female', data: [0,0,0,0,0], backgroundColor: 'rgba(255,153,0,0.85)', borderRadius: 4 },
+    { label: 'Male',   data: [0,0,0,0,0], backgroundColor: 'rgba(20,110,180,0.85)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let ageAttrChart = mkChart('ageAttrChart', {
+  type: 'bar',
+  data: { labels: AGE_GROUP_LABELS, datasets: [{ label: 'Attritions', data: [0,0,0,0,0], backgroundColor: ['rgba(196,0,0,.85)','rgba(196,0,0,.75)','rgba(196,0,0,.65)','rgba(196,0,0,.55)','rgba(196,0,0,.45)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let deptChart = mkChart('deptChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#146eb4','#ff9900','#007185','#c40000','#565959'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '58%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let jobRoleChart = mkChart('jobRoleChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [{ label: 'Attrition %', data: [], backgroundColor: 'rgba(20,110,180,.8)', borderRadius: 3 }]},
+  options: { indexAxis: 'y', responsive: true, plugins: { datalabels: DL_HBAR, legend:{display:false}, tooltip:{...TT} }, scales: { x:{max:100, grid:{color:'#f0f2f2'}}, y:{grid:{display:false}} } }
+});
+
+let genderChart = mkChart('genderChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#146eb4','#ff9900'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '60%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let otChart = mkChart('otChart', {
+  type: 'bar',
+  data: { labels: ['No Overtime','Overtime'], datasets: [
+    { label: 'Left',     data: [], backgroundColor: 'rgba(196,0,0,.85)', borderRadius: 4 },
+    { label: 'Retained', data: [], backgroundColor: 'rgba(0,118,0,.75)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{position:'bottom'}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let travelChart = mkChart('travelChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#007185','#ff9900','#232f3e','#c40000'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '55%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let wlbChart = mkChart('wlbChart', {
+  type: 'bar',
+  data: { labels: ['1 — Poor','2 — Fair','3 — Good','4 — Excellent'], datasets: [{ label: 'Attritions', data: [], backgroundColor: ['rgba(196,0,0,.85)','rgba(228,121,17,.85)','rgba(0,118,0,.8)','rgba(20,110,180,.85)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+// Attrition section charts
+let attrAgeChart = mkChart('attrAgeChart', {
+  type: 'bar',
+  data: { labels: AGE_GROUP_LABELS, datasets: [
+    { label: 'Attrition', data: [0,0,0,0,0], backgroundColor: 'rgba(196,0,0,.8)', borderRadius: 4 },
+    { label: 'Retained', data: [0,0,0,0,0], backgroundColor: 'rgba(20,110,180,.6)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{position:'bottom'}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let attrDeptChart = mkChart('attrDeptChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#146eb4','#ff9900','#007185','#c40000'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '55%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let attrMaritalChart = mkChart('attrMaritalChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [
+    { label: 'Left', data: [], backgroundColor: 'rgba(196,0,0,.8)', borderRadius: 4 },
+    { label: 'Stayed', data: [], backgroundColor: 'rgba(0,118,0,.7)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{position:'bottom'}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let attrTravelChart = mkChart('attrTravelChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [
+    { label: 'Left', data: [], backgroundColor: 'rgba(196,0,0,.8)', borderRadius: 4 },
+    { label: 'Stayed', data: [], backgroundColor: 'rgba(0,118,0,.7)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{position:'bottom'}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let attrRoleChart = mkChart('attrRoleChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [{ label: 'Attrition %', data: [], backgroundColor: 'rgba(196,0,0,.75)', borderRadius: 3 }]},
+  options: { indexAxis: 'y', responsive: true, plugins: { datalabels: DL_HBAR, legend:{display:false}, tooltip:{...TT} }, scales: { x:{max:100, grid:{color:'#f0f2f2'}}, y:{grid:{display:false}} } }
+});
+
+// Workforce charts
+let wfAgeChart = mkChart('wfAgeChart', {
+  type: 'bar',
+  data: { labels: AGE_GROUP_LABELS, datasets: [{ label: 'Employees', data: [0,0,0,0,0], backgroundColor: ['#146eb4','#00a8c5','#007185','#ff9900','#e47911'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let wfDeptChart = mkChart('wfDeptChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#146eb4','#ff9900','#007185'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '55%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let wfEduChart = mkChart('wfEduChart', {
+  type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: ['#146eb4','#ff9900','#007185','#c40000','#007600','#565959'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { cutout: '55%', responsive: true, plugins: { datalabels: DL_DONUT, legend:{position:'bottom'}, tooltip:{...TT} } }
+});
+
+let wfRoleChart = mkChart('wfRoleChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [{ label: 'Headcount', data: [], backgroundColor: 'rgba(0,113,133,.8)', borderRadius: 3 }]},
+  options: { indexAxis: 'y', responsive: true, plugins: { datalabels: { ...DL_BAR, formatter: (v)=>v }, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{color:'#f0f2f2'}}, y:{grid:{display:false}} } }
+});
+
+let wfIncomeChart = mkChart('wfIncomeChart', {
+  type: 'bar',
+  data: { labels: AGE_GROUP_LABELS, datasets: [{ label: 'Avg Income', data: [0,0,0,0,0], backgroundColor: ['rgba(20,110,180,.85)','rgba(0,168,197,.8)','rgba(0,113,133,.8)','rgba(255,153,0,.85)','rgba(228,121,17,.85)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: { ...DL_BAR_OUTER, formatter: (v)=>v>0?Math.round(v/1000)+'K':'' }, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+// Satisfaction charts
+let satDistChart = mkChart('satDistChart', {
+  type: 'bar',
+  data: { labels: ['1 — Low','2 — Medium','3 — High','4 — Very High'], datasets: [{ label: 'Employees', data: [], backgroundColor: ['rgba(196,0,0,.8)','rgba(228,121,17,.8)','rgba(0,118,0,.75)','rgba(20,110,180,.8)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let envSatChart = mkChart('envSatChart', {
+  type: 'bar',
+  data: { labels: ['1 — Low','2 — Medium','3 — High','4 — Very High'], datasets: [{ label: 'Employees', data: [], backgroundColor: ['rgba(196,0,0,.8)','rgba(228,121,17,.8)','rgba(0,118,0,.75)','rgba(20,110,180,.8)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let wlbDistChart = mkChart('wlbDistChart', {
+  type: 'bar',
+  data: { labels: ['1 — Poor','2 — Fair','3 — Good','4 — Excellent'], datasets: [{ label: 'Employees', data: [], backgroundColor: ['rgba(196,0,0,.8)','rgba(228,121,17,.8)','rgba(0,118,0,.75)','rgba(20,110,180,.8)'], borderRadius: 4 }]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR_OUTER, legend:{display:false}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+let satRoleChart = mkChart('satRoleChart', {
+  type: 'bar',
+  data: { labels: [], datasets: [{ label: 'Avg Satisfaction', data: [], backgroundColor: 'rgba(0,113,133,.8)', borderRadius: 3 }]},
+  options: { indexAxis: 'y', responsive: true, plugins: { datalabels: { ...DL_BAR, formatter:(v)=>v.toFixed(1) }, legend:{display:false}, tooltip:{...TT} }, scales: { x:{max:4, grid:{color:'#f0f2f2'}}, y:{grid:{display:false}} } }
+});
+
+let satAttrChart = mkChart('satAttrChart', {
+  type: 'bar',
+  data: { labels: ['1 — Low','2 — Medium','3 — High','4 — Very High'], datasets: [
+    { label: 'Left', data: [], backgroundColor: 'rgba(196,0,0,.8)', borderRadius: 4 },
+    { label: 'Stayed', data: [], backgroundColor: 'rgba(0,118,0,.7)', borderRadius: 4 }
+  ]},
+  options: { responsive: true, plugins: { datalabels: DL_BAR, legend:{position:'bottom'}, tooltip:{...TT} }, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f2f2'}} } }
+});
+
+// SECTION SWITCHER with highlight + dim effect
+function showSection(name, btn) {
+  document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  window.currentSection = name;
+
+  const all = ['overview','attrition','workforce','satisfaction'];
+  all.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (!el) return;
+    if (s === name) {
+      el.classList.remove('hidden', 'faded');
+    } else {
+      el.classList.add('hidden');
+      el.classList.remove('faded');
     }
-    return null;
-};
+  });
+}
 
-document.getElementById('fileUpload').addEventListener('change', function(e){
+// DEPARTMENT FILTER with highlight + dim effect
+function filterDept(dept, el) {
+  document.querySelectorAll('.sub-link').forEach(d => {
+    d.classList.remove('active-dept');
+    if (d !== el) d.style.opacity = '0.55';
+    else d.style.opacity = '1';
+  });
+  el.classList.add('active-dept');
+  el.style.opacity = '1';
+
+  window.currentDept = dept;
+  document.getElementById('deptMeta').textContent = dept === 'All' ? 'All Departments' : dept;
+  if (!window.fullData || !window.fullData.length) return;
+
+  const filtered = dept === 'All'
+    ? window.fullData
+    : window.fullData.filter(row => {
+        const d = String(getVal(row, 'department', 'dept') || '').trim().toLowerCase();
+        const deptL = dept.toLowerCase();
+        return d === deptL || d.includes(deptL) ||
+          (dept === 'R&D' && (d.includes('r&d') || d.includes('research') || d.includes('development')));
+      });
+
+  processAndRender(filtered);
+}
+
+// FILE UPLOAD
+document.getElementById('fileUpload').addEventListener('change', function(e) {
   const file = e.target.files[0];
-  if(!file) return;
-
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(event){
+  reader.onload = function(event) {
     try {
       const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
+      const workbook = XLSX.read(data, { type: 'array' });
       const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-      
-      if(jsonData.length === 0) { alert("File is empty."); return; }
+      if (!jsonData.length) { alert('File khali hai!'); return; }
       window.rawUploadedData = jsonData;
-
-      let total = jsonData.length;
-      let attr = 0, totalAge = 0, totalPay = 0;
-      
-      let ageG = { f: [0,0,0,0,0], m: [0,0,0,0,0] }; 
-      let ageAttrMap = {};
-      let deptMap = {}, roleData = {}, eduMap = {}, travelMap = {};
-      let genderCount = { male: 0, female: 0 };
-      let otMap = { 'No Overtime': { left:0, stay:0 }, 'Overtime': { left:0, stay:0 } };
-      let wlbMap = { 1:0, 2:0, 3:0, 4:0 };
-
-      // Process dataset dynamically
-      jsonData.forEach(row => {
-        let attVal = String(getVal(row, 'attrition', 'left', 'status') || '').toLowerCase().trim();
-        let isLeft = (attVal === 'yes' || attVal === '1' || attVal === 'true');
-        if (isLeft) attr++;
-
-        let age = parseInt(getVal(row, 'age')) || 30;
-        totalAge += age;
-        if (isLeft) ageAttrMap[age] = (ageAttrMap[age] || 0) + 1;
-
-        let pay = parseFloat(getVal(row, 'monthlyincome', 'monthlypay', 'salary', 'pay')) || 5000;
-        totalPay += pay;
-
-        let gen = String(getVal(row, 'gender', 'sex') || '').toLowerCase().trim();
-        let isFemale = (gen === 'female' || gen === 'f');
-        if (isFemale) genderCount.female++; else genderCount.male++;
-
-        let ageIdx = age < 25 ? 0 : age <= 34 ? 1 : age <= 44 ? 2 : age <= 54 ? 3 : 4;
-        if (isFemale) ageG.f[ageIdx]++; else ageG.m[ageIdx]++;
-
-        let dept = String(getVal(row, 'department', 'dept') || 'Other').trim();
-        if (isLeft) deptMap[dept] = (deptMap[dept] || 0) + 1;
-
-        let role = String(getVal(row, 'jobrole', 'role', 'title') || 'Employee').trim();
-        if(!roleData[role]) roleData[role] = { total: 0, left: 0, sat: [0,0,0,0] };
-        roleData[role].total++;
-        if(isLeft) roleData[role].left++;
-        
-        let sat = parseInt(getVal(row, 'jobsatisfaction', 'satisfaction')) || 3;
-        if (sat >= 1 && sat <= 4) roleData[role].sat[sat-1]++;
-
-        let edu = String(getVal(row, 'educationfield', 'education', 'degree') || 'Other').trim();
-        if (isLeft) eduMap[edu] = (eduMap[edu] || 0) + 1;
-
-        let travel = String(getVal(row, 'businesstravel', 'travel') || 'Unknown').trim();
-        travelMap[travel] = (travelMap[travel] || 0) + 1;
-
-        let ot = String(getVal(row, 'overtime', 'ot') || '').toLowerCase().trim();
-        let isOt = (ot === 'yes' || ot === 'true' || ot === '1');
-        let otKey = isOt ? 'Overtime' : 'No Overtime';
-        if (isLeft) otMap[otKey].left++; else otMap[otKey].stay++;
-
-        let wlb = parseInt(getVal(row, 'worklifebalance', 'wlb')) || 3;
-        if (isLeft && wlb >= 1 && wlb <= 4) wlbMap[wlb]++;
-      });
-
-      let rate = total > 0 ? (attr / total) * 100 : 0;
-      let active = total - attr;
-
-      // UPDATE KPIs
-      document.getElementById('k1').textContent = total.toLocaleString();
-      document.getElementById('k2').textContent = attr.toLocaleString();
-      document.getElementById('k3').textContent = rate.toFixed(2) + '%';
-      document.getElementById('k4').textContent = active.toLocaleString();
-      document.getElementById('k4-sub').innerHTML = `<b>${total > 0 ? (active/total*100).toFixed(2) : 0}%</b> retention rate`;
-      document.getElementById('k5').textContent = total > 0 ? (totalAge/total).toFixed(1) : '0';
-      document.getElementById('k6').textContent = '₹' + Math.floor(total > 0 ? totalPay/total : 0).toLocaleString();
-
-      // UPDATE CHARTS
-      ageGroupChart.data.labels = ['Under 25','25–34','35–44','45–54','Over 55'];
-      ageGroupChart.data.datasets[0].data = ageG.f;
-      ageGroupChart.data.datasets[1].data = ageG.m;
-      ageGroupChart.update();
-
-      let sortedAges = Object.keys(ageAttrMap).map(Number).sort((a,b)=>a-b);
-      ageAttrChart.data.labels = sortedAges;
-      ageAttrChart.data.datasets[0].data = sortedAges.map(a => ageAttrMap[a]);
-      ageAttrChart.update();
-
-      deptChart.data.labels = Object.keys(deptMap);
-      deptChart.data.datasets[0].data = Object.values(deptMap);
-      deptChart.update();
-
-      let roles = Object.keys(roleData).sort((a,b) => roleData[b].total - roleData[a].total).slice(0, 9);
-      jobRoleChart.data.labels = roles;
-      jobRoleChart.data.datasets[0].data = roles.map(r => {
-        let t = roleData[r].total, l = roleData[r].left;
-        return t > 0 ? parseFloat(((l / t) * 100).toFixed(1)) : 0;
-      });
-      jobRoleChart.update();
-
-      let gTot = genderCount.male + genderCount.female || 1;
-      genderChart.data.labels = [`Male (${Math.round(genderCount.male/gTot*100)}%)`, `Female (${Math.round(genderCount.female/gTot*100)}%)`];
-      genderChart.data.datasets[0].data = [genderCount.male, genderCount.female];
-      genderChart.update();
-
-      otChart.data.datasets[0].data = [otMap['No Overtime'].left, otMap['Overtime'].left];
-      otChart.data.datasets[1].data = [otMap['No Overtime'].stay, otMap['Overtime'].stay];
-      otChart.update();
-
-      travelChart.data.labels = Object.keys(travelMap);
-      travelChart.data.datasets[0].data = Object.values(travelMap);
-      travelChart.update();
-
-      wlbChart.data.datasets[0].data = [wlbMap[1], wlbMap[2], wlbMap[3], wlbMap[4]];
-      wlbChart.update();
-
-      // Dynamic Job Satisfaction Table
-      const tb = document.getElementById('satTbody');
-      tb.innerHTML = '';
-      let totalCols = [0,0,0,0,0];
-      roles.forEach(r => {
-        let counts = roleData[r].sat;
-        let rowTot = counts.reduce((a,b)=>a+b,0);
-        let hi = Math.max(...counts);
-        for(let i=0;i<4;i++) totalCols[i]+=counts[i]; totalCols[4]+=rowTot;
-        tb.innerHTML += `<tr><td style="text-align:left;">${r}</td>${counts.map(j=>`<td class="${j===hi && hi>0?'cell-hi':''}">${j}</td>`).join('')}<td style="font-weight:700;color:var(--orange2)">${rowTot}</td></tr>`;
-      });
-      tb.innerHTML += `<tr class="foot-row"><td style="text-align:left;">Total</td><td>${totalCols[0]}</td><td>${totalCols[1]}</td><td>${totalCols[2]}</td><td>${totalCols[3]}</td><td>${totalCols[4].toLocaleString()}</td></tr>`;
-
-      // Dynamic Education Bars
-      const eb = document.getElementById('eduBars'); eb.innerHTML = '';
-      let eduLabels = Object.keys(eduMap).sort((a,b) => eduMap[b] - eduMap[a]).slice(0, 6);
-      let eduVals = eduLabels.map(l => eduMap[l]);
-      let maxEdu = Math.max(...eduVals, 1);
-      const colors = ['#146eb4','#c40000','#ff9900','#007185','#565959','#007600'];
-      eduLabels.forEach((lbl,i)=>{
-        const pct = Math.round((eduVals[i]||0)/maxEdu*100);
-        eb.innerHTML += `<div class="prog-item"><div class="prog-row"><span>${lbl}</span><span>${eduVals[i]||0}</span></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div></div>`;
-      });
-
-    } catch(err){
+      window.fullData = jsonData;
+      window.currentDept = 'All';
+      document.querySelectorAll('.sub-link').forEach(d => { d.classList.remove('active-dept'); d.style.opacity='1'; });
+      document.querySelector('.sub-link').classList.add('active-dept');
+      processAndRender(jsonData);
+      const banner = document.getElementById('alertBanner');
+      banner.className = 'insight success';
+      banner.innerHTML = '<span class="insight-icon">✅</span><span><b>Data Load Ho Gaya!</b> ' + jsonData.length.toLocaleString() + ' employees ka data successfully load hua.</span>';
+    } catch(err) {
       console.error(err);
-      alert('Upload failed: Ensure your Excel file format is correct.');
+      alert('Upload failed: Excel file format check karo.');
     }
   };
   reader.readAsArrayBuffer(file);
 });
 
-function exportReport() {
-  if (!window.rawUploadedData) {
-    alert("Please upload your data first!");
-    return;
-  }
+// MAIN DATA PROCESSING
+function processAndRender(jsonData) {
+  let total = jsonData.length;
+  let attr = 0, totalAge = 0, totalPay = 0, totalTenure = 0;
+  let ageG = { f: [0,0,0,0,0], m: [0,0,0,0,0] };
+  let ageAttrCount = [0,0,0,0,0], ageRetainCount = [0,0,0,0,0], ageTotalCount = [0,0,0,0,0];
+  let ageIncomeSum = [0,0,0,0,0];
+  let deptMap = {}, deptTotal = {}, roleData = {}, eduMap = {}, eduTotal = {};
+  let travelMap = {}, travelAttr = {};
+  let genderCount = { male: 0, female: 0 };
+  let otMap = { 'No Overtime': {left:0,stay:0}, 'Overtime': {left:0,stay:0} };
+  let wlbMap = {1:0,2:0,3:0,4:0}, wlbAll = {1:0,2:0,3:0,4:0};
+  let satMap = {1:0,2:0,3:0,4:0}, satAttrMap = {1:0,2:0,3:0,4:0}, satStayMap = {1:0,2:0,3:0,4:0};
+  let envMap = {1:0,2:0,3:0,4:0};
+  let maritalAttr = {}, maritalTotal = {};
+  let eduLvlMap = {};
+
+  jsonData.forEach(row => {
+    let attVal = String(getVal(row,'attrition','left','status')||'').toLowerCase().trim();
+    let isLeft = (attVal==='yes'||attVal==='1'||attVal==='true');
+    if (isLeft) attr++;
+
+    let age = parseInt(getVal(row,'age'));
+    if (!isNaN(age)) { totalAge += age; }
+
+    let pay = parseFloat(getVal(row,'monthlyincome','monthlypay','salary','pay'))||0;
+    totalPay += pay;
+
+    let tenure = parseFloat(getVal(row,'yearsatcompany','tenure','years'))||0;
+    totalTenure += tenure;
+
+    let gen = String(getVal(row,'gender','sex')||'').toLowerCase().trim();
+    let isFemale = (gen==='female'||gen==='f');
+    if (isFemale) genderCount.female++; else genderCount.male++;
+
+    // AGE GROUP — use string column first (fixes Under 25 bug)
+    let ageIdx = getAgeGroupIndex(row);
+    if (ageIdx >= 0) {
+      if (isFemale) ageG.f[ageIdx]++; else ageG.m[ageIdx]++;
+      ageTotalCount[ageIdx]++;
+      ageIncomeSum[ageIdx] += pay;
+      if (isLeft) ageAttrCount[ageIdx]++; else ageRetainCount[ageIdx]++;
+    }
+
+    let dept = String(getVal(row,'department','dept')||'Other').trim();
+    if (isLeft) deptMap[dept] = (deptMap[dept]||0)+1;
+    deptTotal[dept] = (deptTotal[dept]||0)+1;
+
+    let role = String(getVal(row,'jobrole','role','title')||'Employee').trim();
+    if (!roleData[role]) roleData[role] = {total:0,left:0,sat:[0,0,0,0],satSum:0};
+    roleData[role].total++;
+    if (isLeft) roleData[role].left++;
+    let sat = parseInt(getVal(row,'jobsatisfaction','satisfaction'))||0;
+    if (sat>=1&&sat<=4) { roleData[role].sat[sat-1]++; roleData[role].satSum+=sat; satMap[sat]++; }
+    if (isLeft&&sat>=1&&sat<=4) satAttrMap[sat]++;
+    else if (!isLeft&&sat>=1&&sat<=4) satStayMap[sat]++;
+
+    let edu = String(getVal(row,'educationfield','educfield')||'Other').trim();
+    if (isLeft) eduMap[edu] = (eduMap[edu]||0)+1;
+    eduTotal[edu] = (eduTotal[edu]||0)+1;
+
+    let eduLvl = String(getVal(row,'education')||'').trim();
+    if (eduLvl) eduLvlMap[eduLvl] = (eduLvlMap[eduLvl]||0)+1;
+
+    let travel = String(getVal(row,'businesstravel','travel')||'Unknown').trim();
+    travelMap[travel] = (travelMap[travel]||0)+1;
+    if (!travelAttr[travel]) travelAttr[travel] = {left:0,stay:0};
+    if (isLeft) travelAttr[travel].left++; else travelAttr[travel].stay++;
+
+    let ot = String(getVal(row,'overtime','ot')||'').toLowerCase().trim();
+    let isOt = (ot==='yes'||ot==='true'||ot==='1');
+    let otKey = isOt?'Overtime':'No Overtime';
+    if (isLeft) otMap[otKey].left++; else otMap[otKey].stay++;
+
+    let wlb = parseInt(getVal(row,'worklifebalance','wlb'))||0;
+    if (wlb>=1&&wlb<=4) wlbAll[wlb]++;
+    if (isLeft&&wlb>=1&&wlb<=4) wlbMap[wlb]++;
+
+    let env = parseInt(getVal(row,'environmentsatisfaction','envsatisfaction','envsat'))||0;
+    if (env>=1&&env<=4) envMap[env]++;
+
+    let marital = String(getVal(row,'maritalstatus','marital')||'Unknown').trim();
+    if (!maritalAttr[marital]) maritalAttr[marital]={left:0,stay:0};
+    if (isLeft) maritalAttr[marital].left++; else maritalAttr[marital].stay++;
+  });
+
+  let validAgeCount = jsonData.filter(r=>{let a=parseInt(getVal(r,'age'));return a&&!isNaN(a);}).length;
+  let rate = total>0?(attr/total)*100:0;
+  let active = total-attr;
+  let avgPay = total>0?Math.floor(totalPay/total):0;
+  let avgTenure = total>0?(totalTenure/total).toFixed(1):0;
+  let avgSat = Object.entries(satMap).reduce((s,[k,v])=>s+parseInt(k)*v,0)/Math.max(Object.values(satMap).reduce((a,b)=>a+b,0),1);
+  let avgEnv = Object.entries(envMap).reduce((s,[k,v])=>s+parseInt(k)*v,0)/Math.max(Object.values(envMap).reduce((a,b)=>a+b,0),1);
+  let avgWlb = Object.entries(wlbAll).reduce((s,[k,v])=>s+parseInt(k)*v,0)/Math.max(Object.values(wlbAll).reduce((a,b)=>a+b,0),1);
+  let otWorkers = (otMap['Overtime'].left+otMap['Overtime'].stay);
+
+  // Find highest attrition age group
+  let maxAttrIdx = ageAttrCount.indexOf(Math.max(...ageAttrCount));
+  let highRisk = AGE_GROUP_LABELS[maxAttrIdx]||'—';
+
+  // Store stats for other sections
+  window.processedStats = { total,attr,rate,active,avgPay,avgTenure,avgSat,avgEnv,avgWlb,otWorkers,genderCount,highRisk };
+
+  // KPIs
+  document.getElementById('k1').textContent = total.toLocaleString();
+  document.getElementById('k2').textContent = attr.toLocaleString();
+  document.getElementById('k3').textContent = rate.toFixed(2)+'%';
+  document.getElementById('k4').textContent = active.toLocaleString();
+  document.getElementById('k4-sub').innerHTML = `<b>${total>0?(active/total*100).toFixed(2):0}%</b> retention rate`;
+  document.getElementById('k5').textContent = validAgeCount>0?(totalAge/validAgeCount).toFixed(1):'0';
+  document.getElementById('k6').textContent = avgPay>0?avgPay.toLocaleString():'0';
+
+  // Attrition section KPIs
+  document.getElementById('a-total').textContent = attr;
+  document.getElementById('a-rate').textContent = rate.toFixed(2)+'%';
+  document.getElementById('a-ot').textContent = otMap['Overtime'].left;
+  document.getElementById('a-risk').textContent = highRisk;
+  // Workforce KPIs
+  document.getElementById('w-total').textContent = total.toLocaleString();
+  document.getElementById('w-male').textContent = genderCount.male.toLocaleString();
+  document.getElementById('w-female').textContent = genderCount.female.toLocaleString();
+  document.getElementById('w-tenure').textContent = avgTenure+' yrs';
+  // Satisfaction KPIs
+  document.getElementById('s-job').textContent = avgSat.toFixed(2);
+  document.getElementById('s-env').textContent = avgEnv.toFixed(2);
+  document.getElementById('s-wlb').textContent = avgWlb.toFixed(2);
+  document.getElementById('s-ot').textContent = otWorkers;
+
+  // OVERVIEW CHARTS
+  ageGroupChart.data.datasets[0].data = [...ageG.f];
+  ageGroupChart.data.datasets[1].data = [...ageG.m];
+  ageGroupChart.update();
+
+  ageAttrChart.data.datasets[0].data = [...ageAttrCount];
+  ageAttrChart.update();
+
+  deptChart.data.labels = Object.keys(deptMap);
+  deptChart.data.datasets[0].data = Object.values(deptMap);
+  deptChart.update();
+
+  let roles = Object.keys(roleData).sort((a,b)=>roleData[b].total-roleData[a].total).slice(0,9);
+  jobRoleChart.data.labels = roles;
+  jobRoleChart.data.datasets[0].data = roles.map(r=>{ let t=roleData[r].total,l=roleData[r].left; return t>0?parseFloat(((l/t)*100).toFixed(1)):0; });
+  jobRoleChart.update();
+
+  let gTot = genderCount.male+genderCount.female||1;
+  genderChart.data.labels = [`Male (${Math.round(genderCount.male/gTot*100)}%)`,`Female (${Math.round(genderCount.female/gTot*100)}%)`];
+  genderChart.data.datasets[0].data = [genderCount.male,genderCount.female];
+  genderChart.update();
+
+  otChart.data.datasets[0].data = [otMap['No Overtime'].left,otMap['Overtime'].left];
+  otChart.data.datasets[1].data = [otMap['No Overtime'].stay,otMap['Overtime'].stay];
+  otChart.update();
+
+  travelChart.data.labels = Object.keys(travelMap);
+  travelChart.data.datasets[0].data = Object.values(travelMap);
+  travelChart.update();
+
+  wlbChart.data.datasets[0].data = [wlbMap[1],wlbMap[2],wlbMap[3],wlbMap[4]];
+  wlbChart.update();
+
+  // Satisfaction table
+  const tb = document.getElementById('satTbody'); tb.innerHTML='';
+  let totalCols = [0,0,0,0,0];
+  roles.forEach(r=>{
+    let counts=roleData[r].sat, rowTot=counts.reduce((a,b)=>a+b,0), hi=Math.max(...counts);
+    for(let i=0;i<4;i++){totalCols[i]+=counts[i];} totalCols[4]+=rowTot;
+    tb.innerHTML+=`<tr><td style="text-align:left;">${r}</td>${counts.map(j=>`<td class="${j===hi&&hi>0?'cell-hi':''}">${j}</td>`).join('')}<td style="font-weight:700;color:var(--orange2)">${rowTot}</td></tr>`;
+  });
+  tb.innerHTML+=`<tr class="foot-row"><td style="text-align:left;">Total</td><td>${totalCols[0]}</td><td>${totalCols[1]}</td><td>${totalCols[2]}</td><td>${totalCols[3]}</td><td>${totalCols[4].toLocaleString()}</td></tr>`;
+
+  // Education bars
+  const eb=document.getElementById('eduBars'); eb.innerHTML='';
+  let eduLabels=Object.keys(eduMap).sort((a,b)=>eduMap[b]-eduMap[a]).slice(0,6);
+  let eduVals=eduLabels.map(l=>eduMap[l]), maxEdu=Math.max(...eduVals,1);
+  const colors=['#146eb4','#c40000','#ff9900','#007185','#565959','#007600'];
+  eduLabels.forEach((lbl,i)=>{
+    const pct=Math.round((eduVals[i]||0)/maxEdu*100);
+    eb.innerHTML+=`<div class="prog-item"><div class="prog-row"><span>${lbl}</span><span>${eduVals[i]||0}</span></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div></div>`;
+  });
+
+  // ATTRITION SECTION CHARTS
+  attrAgeChart.data.datasets[0].data = [...ageAttrCount];
+  attrAgeChart.data.datasets[1].data = [...ageRetainCount];
+  attrAgeChart.update();
+
+  attrDeptChart.data.labels = Object.keys(deptMap);
+  attrDeptChart.data.datasets[0].data = Object.values(deptMap);
+  attrDeptChart.update();
+
+  let maritalKeys = Object.keys(maritalAttr).sort();
+  attrMaritalChart.data.labels = maritalKeys;
+  attrMaritalChart.data.datasets[0].data = maritalKeys.map(k=>maritalAttr[k].left);
+  attrMaritalChart.data.datasets[1].data = maritalKeys.map(k=>maritalAttr[k].stay);
+  attrMaritalChart.update();
+
+  let travelKeys = Object.keys(travelAttr).sort();
+  attrTravelChart.data.labels = travelKeys;
+  attrTravelChart.data.datasets[0].data = travelKeys.map(k=>travelAttr[k].left);
+  attrTravelChart.data.datasets[1].data = travelKeys.map(k=>travelAttr[k].stay);
+  attrTravelChart.update();
+
+  let allRoles = Object.keys(roleData).sort((a,b)=>roleData[b].total-roleData[a].total);
+  attrRoleChart.data.labels = allRoles;
+  attrRoleChart.data.datasets[0].data = allRoles.map(r=>{ let t=roleData[r].total,l=roleData[r].left; return t>0?parseFloat(((l/t)*100).toFixed(1)):0; });
+  attrRoleChart.update();
+
+  // WORKFORCE SECTION CHARTS
+  wfAgeChart.data.datasets[0].data = [...ageTotalCount];
+  wfAgeChart.update();
+
+  wfDeptChart.data.labels = Object.keys(deptTotal);
+  wfDeptChart.data.datasets[0].data = Object.values(deptTotal);
+  wfDeptChart.update();
+
+  let eduLvlKeys = Object.keys(eduLvlMap).sort((a,b)=>eduLvlMap[b]-eduLvlMap[a]);
+  wfEduChart.data.labels = eduLvlKeys;
+  wfEduChart.data.datasets[0].data = eduLvlKeys.map(k=>eduLvlMap[k]);
+  wfEduChart.update();
+
+  wfRoleChart.data.labels = allRoles;
+  wfRoleChart.data.datasets[0].data = allRoles.map(r=>roleData[r].total);
+  wfRoleChart.update();
+
+  wfIncomeChart.data.datasets[0].data = ageTotalCount.map((cnt,i)=>cnt>0?Math.round(ageIncomeSum[i]/cnt):0);
+  wfIncomeChart.update();
+
+  // SATISFACTION SECTION CHARTS
+  satDistChart.data.datasets[0].data = [satMap[1],satMap[2],satMap[3],satMap[4]];
+  satDistChart.update();
+
+  envSatChart.data.datasets[0].data = [envMap[1],envMap[2],envMap[3],envMap[4]];
+  envSatChart.update();
+
+  wlbDistChart.data.datasets[0].data = [wlbAll[1],wlbAll[2],wlbAll[3],wlbAll[4]];
+  wlbDistChart.update();
+
+  satRoleChart.data.labels = allRoles;
+  satRoleChart.data.datasets[0].data = allRoles.map(r=>{ let cnt=roleData[r].sat.reduce((a,b)=>a+b,0); return cnt>0?parseFloat((roleData[r].satSum/cnt).toFixed(2)):0; });
+  satRoleChart.update();
+
+  satAttrChart.data.datasets[0].data = [satAttrMap[1],satAttrMap[2],satAttrMap[3],satAttrMap[4]];
+  satAttrChart.data.datasets[1].data = [satStayMap[1],satStayMap[2],satStayMap[3],satStayMap[4]];
+  satAttrChart.update();
+}
+
+// EXPORT EXCEL
+function exportExcel() {
+  if (!window.rawUploadedData) { alert('Pehle data upload karo!'); return; }
   const wb = XLSX.utils.book_new();
-  const wsRaw = XLSX.utils.json_to_sheet(window.rawUploadedData);
-  XLSX.utils.book_append_sheet(wb, wsRaw, "Detailed Workforce Data");
-  XLSX.writeFile(wb, "HR_Analytics_Export.xlsx");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.rawUploadedData), 'Workforce Data');
+  XLSX.writeFile(wb, 'HR_Analytics_Export.xlsx');
+}
+
+// EXPORT PDF
+async function exportPDF() {
+  const overlay = document.getElementById('pdfOverlay');
+  const msg = document.getElementById('pdfMsg');
+  const btn = document.getElementById('pdfBtn');
+  overlay.classList.add('show'); btn.disabled=true;
+  msg.textContent='📄 Screenshot le raha hai...';
+  try {
+    const {jsPDF} = window.jspdf;
+    const element = document.getElementById('dashboardPage');
+    msg.textContent='🖼️ Charts render ho rahe hain...';
+    await new Promise(r=>setTimeout(r,300));
+    const canvas = await html2canvas(element,{scale:1.5,useCORS:true,backgroundColor:'#f3f3f3',logging:false,scrollX:0,scrollY:-window.scrollY});
+    msg.textContent='📄 PDF pages bana raha hai...';
+    const imgData = canvas.toDataURL('image/jpeg',0.92);
+    const pdf = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight();
+    const ratio=pageW/canvas.width, scaledH=canvas.height*ratio;
+    let pageCount=Math.ceil(scaledH/pageH);
+    for(let i=0;i<pageCount;i++){
+      if(i>0)pdf.addPage();
+      pdf.addImage(imgData,'JPEG',0,-(pageH*i),pageW,scaledH);
+    }
+    for(let i=1;i<=pageCount;i++){
+      pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(150);
+      pdf.text(`HR Analytics Dashboard — FY 2024    |    Page ${i} of ${pageCount}    |    ${new Date().toLocaleDateString('en-IN')}`,pageW/2,pageH-4,{align:'center'});
+    }
+    pdf.save('HR_Analytics_Dashboard.pdf');
+    msg.textContent='✅ PDF Download Ho Gaya!';
+    await new Promise(r=>setTimeout(r,1200));
+  } catch(err) {
+    console.error(err); alert('PDF export error: '+err.message);
+  } finally {
+    overlay.classList.remove('show'); btn.disabled=false;
+  }
 }
 </script>
 </body>
